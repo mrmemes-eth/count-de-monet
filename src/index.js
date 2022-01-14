@@ -83,9 +83,13 @@ const keyMessageAttrs = (message) => {
 
 const aggregateUserStats = (acc, message) => {
   const user = acc[message.username] || { messageCount: 0, totalWordCount: 0 };
+  const messageCount = user.messageCount + 1;
+  const totalWordCount = user.totalWordCount + message.wordCount;
+  const averageWordCount = Math.floor(totalWordCount / messageCount).toFixed(0);
   acc[message.username] = {
-    messageCount: user.messageCount + 1,
-    totalWordCount: user.totalWordCount + message.wordCount,
+    messageCount,
+    totalWordCount,
+    averageWordCount,
   };
   return acc;
 };
@@ -169,6 +173,7 @@ const aggregateUserStats = (acc, message) => {
         username,
         messageCount: userStats[username].messageCount,
         totalWordCount: userStats[username].totalWordCount,
+        averageWordCount: userStats[username].averageWordCount,
       };
     });
     const json2csv = new Parser();
