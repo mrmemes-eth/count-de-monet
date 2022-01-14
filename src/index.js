@@ -75,6 +75,7 @@ const isGenesisMessage = (message) => {
 const keyMessageAttrs = (message) => {
   return {
     username: message.author.username,
+    bot: message.author.bot || false,
     timestamp: message.timestamp,
     content: message.content,
     wordCount: message.content.split(" ").length,
@@ -140,8 +141,10 @@ const aggregateUserStats = (acc, message) => {
     }
 
     console.log("Aggregating genesis messages");
-    // write genesis messages to file
-    const genesisMessages = allMessages.filter(isGenesisMessage);
+    // write genesis messages (not from bot and before genesis date) to file
+    const genesisMessages = allMessages
+      .filter(isGenesisMessage)
+      .filter((m) => !m.bot);
     console.log(
       "There were %s messages before the genesis date of",
       genesisMessages.length,
