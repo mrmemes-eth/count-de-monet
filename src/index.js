@@ -7,7 +7,7 @@ const config = JSON.parse(
   await readFile(new URL("./config.json", import.meta.url))
 );
 
-const genesisDate = new Date("2021-11-01");
+const genesisDate = new Date(config.genesisDate);
 const skipFetch = process.argv.indexOf("--skip-fetch") > -1;
 
 let allMessages = [];
