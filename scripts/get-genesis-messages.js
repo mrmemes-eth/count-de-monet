@@ -1,72 +1,15 @@
-import { stringify } from "querystring";
+#!/usr/bin/env node
+
 import { writeFile, readFile } from "fs/promises";
 import { Parser } from "json2csv";
-import fetch from "node-fetch";
+import Yargs from "yargs";
+import * as Discord from "../src/discord-api.js";
 
-const config = JSON.parse(
-  await readFile(new URL("./config.json", import.meta.url))
-);
+const argv = Yargs(process.argv.slice(2)).argv;
+console.log(argv.skipFetch);
 
-const genesisDate = new Date(config.genesisDate);
-const skipFetch = process.argv.indexOf("--skip-fetch") > -1;
-
+const genesisDate = new Date(Discord.config.genesisDate);
 let allMessages = [];
-let requests = 0;
-let errors = 0;
-
-const get = async (path, query = {}) => {
-  const url = `https://discordapp.com/api/v9${path}?${stringify(query)}`;
-  return await fetch(url, {
-    headers: {
-      Authorization: `Bot ${config.token}`,
-      Accept: "application/json",
-    },
-  }).then((res) => res.json());
-};
-
-const getMessageBatchForChannel = async (channelId, overrides = null) => {
-  const options = Object.assign({ limit: 100 }, overrides);
-  return await get(`/channels/${channelId}/messages`, options)
-    .then((messages) => {
-      return messages;
-    })
-    .catch((err) => {
-      console.log(err);
-      errors++;
-      return [];
-    })
-    .finally(() => {
-      requests++;
-    });
-};
-
-const getAllChannelMessages = async (channel) => {
-  console.log("fetching messages for", channel.name, channel.id);
-  let allChannelMessages = [];
-  let channelMessageBatch = await getMessageBatchForChannel(channel.id);
-  while (channelMessageBatch.length > 0) {
-    try {
-      allChannelMessages = allChannelMessages.concat(channelMessageBatch);
-      const lastMessage = channelMessageBatch[channelMessageBatch.length - 1];
-      // get the next batch of messages
-      console.log(
-        "fetched %s messages starting from: %s",
-        channelMessageBatch.length,
-        lastMessage.timestamp
-      );
-      channelMessageBatch = await getMessageBatchForChannel(channel.id, {
-        before: lastMessage.id,
-      }).catch((err) => {
-        console.log(err);
-        return [];
-      });
-    } catch (err) {
-      console.log("Fatal error fetching messages:", err);
-    }
-  }
-  console.log("finished fetching messages for %s", channel.name);
-  return allChannelMessages;
-};
 
 const isGenesisMessage = (message) => {
   return new Date(message.timestamp) < genesisDate;
@@ -99,23 +42,16 @@ const aggregateUserStats = (acc, message) => {
   try {
     console.log("Started fetching message history...");
 
-    if (!skipFetch) {
-      const textChannels = await get(`/guilds/${config.guildId}/channels`).then(
-        (channels) => {
-          return channels.filter(
-            // channel types documented here:
-            // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-            // Proceeding under the assumption that we only want GUILD_TEXT or GUILD_PUBLIC_THREAD
-            (channel) => channel.type === 0 || channel.type === 11
-          );
-        }
+    if (!argv.skipFetch) {
+      const textChannels = await Discord.getGuildChannels(
+        Discord.config.guildId
       );
       console.log("Text channel count:", textChannels.length);
 
       // iterate channels and retrieve all messages
       for (const channel of textChannels) {
         console.log("Fetching messages for", channel.name);
-        const channelMessages = await getAllChannelMessages(channel);
+        const channelMessages = await Discord.getAllChannelMessages(channel);
         allMessages = allMessages.concat(channelMessages.map(keyMessageAttrs));
         console.log("Fetched %s messages total", channelMessages.length);
       }
@@ -123,8 +59,8 @@ const aggregateUserStats = (acc, message) => {
       console.log(
         "Finished fetching %s messages in %s requests with %s errors",
         allMessages.length,
-        requests,
-        errors
+        Discord.requests,
+        Discord.errors
       );
 
       // write all messages to file
