@@ -54,7 +54,7 @@ export const getGuildChannels = async (guildId) => {
       // channel types documented here:
       // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
       // Proceeding under the assumption that we only want GUILD_TEXT or GUILD_PUBLIC_THREAD
-      (channel) => channel.type === 0 || channel.type === 11
+      (channel) => channel.type !== 2
     );
   });
 };
