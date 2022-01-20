@@ -53,10 +53,37 @@ export const getGuildChannels = async (guildId) => {
     return channels.filter(
       // channel types documented here:
       // https://discord.com/developers/docs/resources/channel#channel-object-channel-types
-      // Proceeding under the assumption that we should only exclude voice channels
+      // Exclude voice channels
       (channel) => channel.type !== 2
     );
   });
+};
+
+export const getChannelThreads = async (channelId) => {
+  const archivedThreads = await get(
+    `/channels/${channelId}/threads/archived/public`
+  )
+    .then((res) => res.threads || [])
+    .catch((err) => console.log(err));
+  const activeThreads = await get(`/channels/${channelId}/threads/active`)
+    .then((res) => res.threads || [])
+    .catch((err) => console.log(err));
+  console.log(
+    "Fetched %s archived threads and %s active threads in",
+    archivedThreads.length,
+    activeThreads.length,
+    channelId
+  );
+  return archivedThreads.concat(activeThreads);
+};
+
+export const getGuildChannelsAndThreads = async (guildId) => {
+  const channels = await getGuildChannels(guildId);
+  console.log("Fetched %s channels", channels.length);
+  const threads = await Promise.all(
+    channels.map((channel) => getChannelThreads(channel.id))
+  );
+  return channels.concat(threads.reduce((acc, val) => acc.concat(val), []));
 };
 
 export const getMessageBatchForChannel = async (

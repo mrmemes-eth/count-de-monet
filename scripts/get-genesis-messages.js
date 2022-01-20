@@ -45,7 +45,7 @@ const aggregateUserStats = (acc, message) => {
     console.log("Started fetching message history...");
 
     if (!argv.skipFetch) {
-      const textChannels = await Discord.getGuildChannels(
+      const textChannels = await Discord.getGuildChannelsAndThreads(
         Discord.config.guildId
       );
       console.log("Text channel count:", textChannels.length);
