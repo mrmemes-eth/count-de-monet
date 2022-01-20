@@ -11,6 +11,8 @@ console.log(argv.skipFetch);
 const genesisDate = new Date(Discord.config.genesisDate);
 let allMessages = [];
 
+const channelBlacklist = Discord.config.channelBlacklist;
+
 const isGenesisMessage = (message) => {
   return new Date(message.timestamp) < genesisDate;
 };
@@ -50,10 +52,14 @@ const aggregateUserStats = (acc, message) => {
 
       // iterate channels and retrieve all messages
       for (const channel of textChannels) {
-        console.log("Fetching messages for", channel.name);
-        const channelMessages = await Discord.getAllChannelMessages(channel);
-        allMessages = allMessages.concat(channelMessages.map(keyMessageAttrs));
-        console.log("Fetched %s messages total", channelMessages.length);
+        if (!channelBlacklist.includes(channel.id)) {
+          console.log("Fetching messages for", channel.name);
+          const channelMessages = await Discord.getAllChannelMessages(channel);
+          allMessages = allMessages.concat(
+            channelMessages.map(keyMessageAttrs)
+          );
+          console.log("Fetched %s messages total", channelMessages.length);
+        }
       }
 
       console.log(
