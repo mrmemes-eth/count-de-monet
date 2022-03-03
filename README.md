@@ -8,7 +8,7 @@
 > Bearnaise: (mockingly) 'I paid for them! They're mine!'  
 > Count de Monet: Don't be saucy with me, Bearnaise.
 
-This is a really simple bot for discord that counts messages that occurred before a date. You'll need to add a `config.json` file with this shape:
+This is a really simple bot for discord that counts messages that occurred before a date. You'll need to add a `config.json` file to the project root with this shape:
 
 ```json
 {
@@ -21,7 +21,7 @@ This is a really simple bot for discord that counts messages that occurred befor
 The simplest way to do that would be to copy the example config into place and then edit its values:
 
 ```shell
-cp src/config{.example,}.json
+cp config{.example,}.json
 ```
 
 Once you have the configuration edited, do an initial run with:

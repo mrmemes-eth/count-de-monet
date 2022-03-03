@@ -6,7 +6,7 @@ export let requests = 0;
 export let errors = 0;
 
 export const config = JSON.parse(
-  await readFile(new URL("./config.json", import.meta.url))
+  await readFile(new URL("../config.json", import.meta.url))
 );
 
 const delay = (ms, value) =>
