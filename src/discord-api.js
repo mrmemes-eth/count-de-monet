@@ -1,13 +1,12 @@
+import 'dotenv/config'
 import { stringify } from "querystring";
 import { readFile } from "fs/promises";
 import fetch from "node-fetch";
 
+const token = process.env.TOKEN;
+
 export let requests = 0;
 export let errors = 0;
-
-export const config = JSON.parse(
-  await readFile(new URL("../config.json", import.meta.url))
-);
 
 const delay = (ms, value) =>
   new Promise((resolve) => setTimeout(resolve, ms, value));
@@ -16,7 +15,7 @@ export const get = async (path, query = {}) => {
   const url = `https://discordapp.com/api/v9${path}?${stringify(query)}`;
   return await fetch(url, {
     headers: {
-      Authorization: `Bot ${config.token}`,
+      Authorization: `Bot ${token}`,
       Accept: "application/json",
     },
   })
