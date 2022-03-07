@@ -8,20 +8,12 @@
 > Bearnaise: (mockingly) 'I paid for them! They're mine!'  
 > Count de Monet: Don't be saucy with me, Bearnaise.
 
-This is a really simple bot for discord that counts messages that occurred before a date. You'll need to add a `config.json` file to the project root with this shape:
+This is a really simple bot for discord that counts messages that occurred before a date. You'll need to add a `.env` to the project root with values for *configuration token*, *guild ID*, *genesis date*, and (optionally) *channel blacklist
 
-```json
-{
-  "token": "<discord-bot-token>",
-  "guildId": "<discord-guild-id>",
-  "genesisDate": "2021-11-01"
-}
-```
-
-The simplest way to do that would be to copy the example config into place and then edit its values:
+The simplest way to do that would be to copy the example `.env` into place and then edit its values:
 
 ```shell
-cp config{.example,}.json
+cp .env{.example,}
 ```
 
 Once you have the configuration edited, do an initial run with:

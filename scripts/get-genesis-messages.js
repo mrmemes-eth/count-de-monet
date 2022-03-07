@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import 'dotenv/config'
 import { writeFile, readFile } from "fs/promises";
 import { Parser } from "json2csv";
 import Yargs from "yargs";
@@ -8,10 +9,11 @@ import * as Discord from "../src/discord-api.js";
 const argv = Yargs(process.argv.slice(2)).argv;
 console.log(argv.skipFetch);
 
-const genesisDate = new Date(Discord.config.genesisDate);
-let allMessages = [];
+const genesisDate = new Date(process.env.GENESIS_DATE);
+const channelBlacklist = process.env.CHANNEL_BLACKLIST;
+const guildId = process.env.GUILD_ID;
 
-const channelBlacklist = Discord.config.channelBlacklist;
+let allMessages = [];
 
 const isGenesisMessage = (message) => {
   return new Date(message.timestamp) < genesisDate;
@@ -46,7 +48,7 @@ const aggregateUserStats = (acc, message) => {
 
     if (!argv.skipFetch) {
       const textChannels = await Discord.getGuildChannelsAndThreads(
-        Discord.config.guildId
+        guildId
       );
       console.log("Text channel count:", textChannels.length);
 
